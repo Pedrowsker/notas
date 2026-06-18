@@ -214,22 +214,45 @@
       .main { margin-left: 200px; padding: 24px 20px; }
       .stats { grid-template-columns: repeat(2, 1fr); }
     }
+    
+    /* Configurações específicas para Celulares */
     @media (max-width: 640px) {
       .sidebar { display: none; }
-      .main { margin-left: 0; padding: 20px 16px; }
-      .stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-      .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
-      .table-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-      .search-wrap input { width: 100%; }
-      thead th:nth-child(3), tbody td:nth-child(3),
-      thead th:nth-child(4), tbody td:nth-child(4) { display: none; }
+      .main { margin-left: 0; padding: 16px; }
+      
+      /* Topbar */
+      .topbar { flex-direction: column; align-items: stretch; gap: 16px; margin-bottom: 24px; }
+      .topbar-left h2 { font-size: 1.25rem; }
+      .topbar .btn-primary { width: 100%; justify-content: center; padding: 12px; }
+      
+      /* Stats Cards */
+      .stats { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
+      .stat-card { padding: 16px; }
+      .stat-value { font-size: 1.3rem; }
+      #stat-amount { font-size: 1rem !important; } /* Previne que valores longos quebrem o card */
+
+      /* Tabela e Busca */
+      .table-header { flex-direction: column; align-items: stretch; gap: 12px; padding: 16px; }
+      .search-wrap, .search-wrap input { width: 100%; }
+      
+      /* Scroll horizontal para a tabela (não perde os dados ao invés de display:none) */
+      #table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      table { min-width: 750px; } 
+
+      /* Modal */
+      .modal { padding: 24px 20px; width: calc(100% - 32px); margin: 16px auto; }
+      .field-row { grid-template-columns: 1fr; gap: 0; } /* Empilha CNPJ e Valor */
+      .modal-footer { flex-direction: column-reverse; gap: 8px; margin-top: 16px; }
+      .modal-footer button, .modal-footer .btn-ghost { width: 100%; justify-content: center; padding: 12px; }
+
+      /* Toast Notifications */
+      #toast { right: 16px; left: 16px; bottom: 16px; text-align: center; }
     }
   </style>
 </head>
 <body>
 
 <div class="layout">
-  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-brand">
       <div class="logo-icon">📄</div>
@@ -250,7 +273,6 @@
     </div>
   </aside>
 
-  <!-- Main -->
   <main class="main">
     <div class="topbar">
       <div class="topbar-left">
@@ -262,7 +284,6 @@
       </button>
     </div>
 
-    <!-- Stats -->
     <div class="stats">
       <div class="stat-card blue">
         <div class="stat-label">Total de Notas</div>
@@ -286,7 +307,6 @@
       </div>
     </div>
 
-    <!-- Table -->
     <div class="table-card">
       <div class="table-header">
         <h3>Notas Cadastradas</h3>
@@ -305,7 +325,6 @@
   </main>
 </div>
 
-<!-- Modal Cadastro / Edição -->
 <div class="modal-backdrop" id="modal" onclick="closeModalOutside(event)">
   <div class="modal">
     <div class="modal-head">
