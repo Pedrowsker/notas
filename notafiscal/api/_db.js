@@ -21,6 +21,8 @@ const InvoiceSchema = new mongoose.Schema({
   email:     { type: String, required: true },
   issued:    { type: Boolean, default: false },
   issuedAt:  { type: Date, default: null },
+  paid:      { type: Boolean, default: false },
+  paidAt:    { type: Date, default: null },
   notes:     { type: String, default: '' },
   createdAt: { type: Date, default: Date.now }
 });

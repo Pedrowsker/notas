@@ -17,6 +17,9 @@ module.exports = async (req, res) => {
     // Se está marcando como emitida, registra a data
     if (fields.issued === true) fields.issuedAt = new Date();
     if (fields.issued === false) fields.issuedAt = null;
+    // Se está marcando como pago, registra a data
+    if (fields.paid === true && !fields.paidAt) fields.paidAt = new Date();
+    if (fields.paid === false) fields.paidAt = null;
 
     const updated = await Invoice.findByIdAndUpdate(id, fields, { new: true });
     if (!updated) return res.status(404).json({ error: 'Nota não encontrada.' });

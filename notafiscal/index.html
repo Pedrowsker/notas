@@ -7,8 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
-    /* ── Reset & base ─────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --navy:    #0f172a;
@@ -26,13 +26,15 @@
       --red-lt:  #fee2e2;
       --amber:   #d97706;
       --amber-lt:#fef3c7;
+      --purple:  #7c3aed;
+      --purple-lt:#ede9fe;
       --radius:  12px;
       --shadow:  0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
     }
     html { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--navy); }
     body { min-height: 100vh; }
 
-    /* ── Sidebar ──────────────────────────────────── */
+    /* ── Sidebar ── */
     .layout { display: flex; min-height: 100vh; }
     .sidebar {
       width: 240px; flex-shrink: 0;
@@ -42,10 +44,7 @@
       position: fixed; top: 0; left: 0; bottom: 0;
       z-index: 100;
     }
-    .sidebar-brand {
-      padding: 0 24px 28px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
+    .sidebar-brand { padding: 0 24px 28px; border-bottom: 1px solid rgba(255,255,255,.08); }
     .sidebar-brand .logo-icon {
       width: 36px; height: 36px; background: var(--blue);
       border-radius: 8px; display: flex; align-items: center;
@@ -68,10 +67,10 @@
     .sidebar-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,.08); }
     .sidebar-footer p { color: #475569; font-size: .72rem; }
 
-    /* ── Main content ─────────────────────────────── */
-    .main { margin-left: 240px; flex: 1; padding: 32px 36px; max-width: 1100px; }
+    /* ── Main ── */
+    .main { margin-left: 240px; flex: 1; padding: 32px 36px; max-width: 1200px; }
 
-    /* ── Topbar ───────────────────────────────────── */
+    /* ── Topbar ── */
     .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
     .topbar-left h2 { font-size: 1.4rem; font-weight: 700; color: var(--navy); }
     .topbar-left p  { color: var(--muted); font-size: .85rem; margin-top: 2px; }
@@ -83,22 +82,53 @@
     }
     .btn-primary:hover { background: var(--blue-dk); }
 
-    /* ── Stat cards ───────────────────────────────── */
-    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+    /* ── Stat cards ── */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
     .stat-card {
       background: var(--surface); border-radius: var(--radius);
       padding: 20px; box-shadow: var(--shadow);
       border-left: 3px solid transparent;
     }
-    .stat-card.blue  { border-color: var(--blue); }
-    .stat-card.green { border-color: var(--green); }
-    .stat-card.amber { border-color: var(--amber); }
-    .stat-card.red   { border-color: var(--red); }
+    .stat-card.blue   { border-color: var(--blue); }
+    .stat-card.green  { border-color: var(--green); }
+    .stat-card.amber  { border-color: var(--amber); }
+    .stat-card.red    { border-color: var(--red); }
+    .stat-card.purple { border-color: var(--purple); }
     .stat-label { font-size: .75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
     .stat-value { font-size: 1.6rem; font-weight: 800; color: var(--navy); line-height: 1; }
     .stat-sub   { font-size: .75rem; color: var(--muted); margin-top: 4px; }
 
-    /* ── Table card ───────────────────────────────── */
+    /* ── Chart section ── */
+    .chart-section {
+      background: var(--surface); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 24px;
+      margin-bottom: 24px; display: flex; align-items: center; gap: 32px;
+    }
+    .chart-wrap { position: relative; width: 180px; height: 180px; flex-shrink: 0; }
+    .chart-legend { flex: 1; }
+    .chart-legend h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
+    .legend-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .legend-item:last-child { border-bottom: none; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .legend-info { display: flex; align-items: center; gap: 10px; flex: 1; }
+    .legend-label { font-size: .85rem; color: var(--slate); font-weight: 500; }
+    .legend-value { font-size: .95rem; font-weight: 700; color: var(--navy); }
+    .legend-pct { font-size: .75rem; color: var(--muted); background: var(--bg); padding: 2px 8px; border-radius: 20px; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 20px; font-size: .75rem; font-weight: 600;
+    }
+    .badge.issued  { background: var(--green-lt); color: var(--green); }
+    .badge.pending { background: var(--amber-lt); color: var(--amber); }
+    .badge.paid    { background: var(--purple-lt); color: var(--purple); }
+    .badge.unpaid  { background: var(--red-lt); color: var(--red); }
+
+    /* ── Table card ── */
     .table-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
     .table-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -129,30 +159,50 @@
     td.company { font-weight: 600; color: var(--navy); }
     td.amount   { font-weight: 700; color: var(--blue); font-size: .9rem; }
 
-    .badge {
-      display: inline-flex; align-items: center; gap: 4px;
-      padding: 3px 10px; border-radius: 20px; font-size: .75rem; font-weight: 600;
+    /* ── Dropdown Actions ── */
+    .action-wrap { position: relative; }
+    .btn-action {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 12px; border: 1px solid var(--border);
+      border-radius: 7px; background: var(--surface);
+      font-size: .82rem; font-weight: 600; color: var(--slate);
+      cursor: pointer; font-family: inherit; transition: all .15s;
+      white-space: nowrap;
     }
-    .badge.issued  { background: var(--green-lt); color: var(--green); }
-    .badge.pending { background: var(--amber-lt); color: var(--amber); }
+    .btn-action:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-lt); }
+    .btn-action svg { transition: transform .2s; }
+    .btn-action.open svg { transform: rotate(180deg); }
 
-    .actions { display: flex; gap: 6px; }
-    .btn-icon {
-      width: 30px; height: 30px; border-radius: 6px; border: none;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      font-size: 14px; transition: all .15s; background: transparent; color: var(--muted);
+    .dropdown-menu {
+      position: absolute; right: 0; top: calc(100% + 6px);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      min-width: 210px; z-index: 50; overflow: hidden;
+      opacity: 0; pointer-events: none; transform: translateY(-6px);
+      transition: all .18s;
     }
-    .btn-icon:hover.edit   { background: var(--blue-lt);  color: var(--blue); }
-    .btn-icon:hover.email  { background: var(--green-lt); color: var(--green); }
-    .btn-icon:hover.del    { background: var(--red-lt);   color: var(--red); }
-    .btn-icon:hover.toggle { background: var(--green-lt); color: var(--green); }
-    .btn-icon:hover.untoggle { background: var(--amber-lt); color: var(--amber); }
+    .dropdown-menu.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+    .dropdown-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 16px; font-size: .85rem; color: var(--slate);
+      font-weight: 500; cursor: pointer; transition: background .1s;
+      border: none; background: none; width: 100%; text-align: left; font-family: inherit;
+    }
+    .dropdown-item:hover { background: var(--bg); color: var(--navy); }
+    .dropdown-item.danger { color: var(--red); }
+    .dropdown-item.danger:hover { background: var(--red-lt); }
+    .dropdown-item.success { color: var(--green); }
+    .dropdown-item.success:hover { background: var(--green-lt); }
+    .dropdown-item.purple { color: var(--purple); }
+    .dropdown-item.purple:hover { background: var(--purple-lt); }
+    .dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
+    .dropdown-item-icon { width: 18px; text-align: center; font-size: 14px; }
 
     .empty-state { padding: 60px 24px; text-align: center; color: var(--muted); }
     .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
     .empty-state p { font-size: .9rem; }
 
-    /* ── Modal ────────────────────────────────────── */
+    /* ── Modal ── */
     .modal-backdrop {
       position: fixed; inset: 0; background: rgba(0,0,0,.45);
       display: flex; align-items: center; justify-content: center;
@@ -191,7 +241,7 @@
     }
     .btn-ghost:hover { border-color: var(--slate); color: var(--navy); }
 
-    /* ── Toast ────────────────────────────────────── */
+    /* ── Toast ── */
     #toast {
       position: fixed; bottom: 28px; right: 28px;
       background: var(--navy); color: #fff;
@@ -204,53 +254,73 @@
     #toast.success { background: #14532d; }
     #toast.error   { background: #7f1d1d; }
 
-    /* ── Spinner ──────────────────────────────────── */
+    /* ── Spinner ── */
     .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Responsive ───────────────────────────────── */
+    /* ── Mobile topbar ── */
+    .mobile-topbar {
+      display: none;
+      position: sticky; top: 0; z-index: 90;
+      background: var(--navy); padding: 14px 16px;
+      align-items: center; justify-content: space-between;
+    }
+    .mobile-topbar .mobile-brand { color: #fff; font-size: .95rem; font-weight: 700; }
+    .mobile-topbar .btn-mobile-add {
+      background: var(--blue); color: #fff; border: none;
+      padding: 8px 14px; border-radius: 8px; font-size: .82rem;
+      font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+
+    /* ── Responsive ── */
     @media (max-width: 900px) {
       .sidebar { width: 200px; }
       .main { margin-left: 200px; padding: 24px 20px; }
       .stats { grid-template-columns: repeat(2, 1fr); }
     }
-    
-    /* Configurações específicas para Celulares */
+
     @media (max-width: 640px) {
       .sidebar { display: none; }
+      .mobile-topbar { display: flex; }
       .main { margin-left: 0; padding: 16px; }
-      
-      /* Topbar */
-      .topbar { flex-direction: column; align-items: stretch; gap: 16px; margin-bottom: 24px; }
-      .topbar-left h2 { font-size: 1.25rem; }
-      .topbar .btn-primary { width: 100%; justify-content: center; padding: 12px; }
-      
-      /* Stats Cards */
-      .stats { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
-      .stat-card { padding: 16px; }
-      .stat-value { font-size: 1.3rem; }
-      #stat-amount { font-size: 1rem !important; } /* Previne que valores longos quebrem o card */
 
-      /* Tabela e Busca */
-      .table-header { flex-direction: column; align-items: stretch; gap: 12px; padding: 16px; }
+      .topbar { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 20px; }
+      .topbar-left h2 { font-size: 1.2rem; }
+      .topbar .btn-primary { display: none; }
+
+      .stats { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+      .stat-card { padding: 14px; }
+      .stat-value { font-size: 1.2rem; }
+      .stat-sub { font-size: .7rem; }
+
+      .chart-section { flex-direction: column; gap: 20px; padding: 16px; }
+      .chart-wrap { width: 160px; height: 160px; margin: 0 auto; }
+      .chart-legend { width: 100%; }
+
+      .table-header { flex-direction: column; align-items: stretch; gap: 12px; padding: 14px; }
       .search-wrap, .search-wrap input { width: 100%; }
-      
-      /* Scroll horizontal para a tabela (não perde os dados ao invés de display:none) */
+
       #table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      table { min-width: 750px; } 
+      table { min-width: 680px; }
 
-      /* Modal */
-      .modal { padding: 24px 20px; width: calc(100% - 32px); margin: 16px auto; }
-      .field-row { grid-template-columns: 1fr; gap: 0; } /* Empilha CNPJ e Valor */
-      .modal-footer { flex-direction: column-reverse; gap: 8px; margin-top: 16px; }
-      .modal-footer button, .modal-footer .btn-ghost { width: 100%; justify-content: center; padding: 12px; }
+      .modal { padding: 20px 16px; width: calc(100% - 24px); max-height: 90vh; overflow-y: auto; }
+      .field-row { grid-template-columns: 1fr; }
+      .modal-footer { flex-direction: column-reverse; gap: 8px; }
+      .modal-footer button { width: 100%; justify-content: center; padding: 12px; }
 
-      /* Toast Notifications */
-      #toast { right: 16px; left: 16px; bottom: 16px; text-align: center; }
+      #toast { right: 12px; left: 12px; bottom: 12px; text-align: center; }
+
+      .dropdown-menu { right: auto; left: 0; }
     }
   </style>
 </head>
 <body>
+
+<!-- Mobile top bar -->
+<div class="mobile-topbar">
+  <span class="mobile-brand">📄 Notas Fiscais</span>
+  <button class="btn-mobile-add" onclick="openModal()">+ Nova Nota</button>
+</div>
 
 <div class="layout">
   <aside class="sidebar">
@@ -261,7 +331,7 @@
     </div>
     <nav class="sidebar-nav">
       <div class="nav-label">Menu</div>
-      <button class="nav-item active" onclick="showSection('dashboard')">
+      <button class="nav-item active">
         <span class="icon">📊</span> Dashboard
       </button>
       <button class="nav-item" onclick="openModal()">
@@ -269,7 +339,7 @@
       </button>
     </nav>
     <div class="sidebar-footer">
-      <p>v2.0 · Vercel + MongoDB</p>
+      <p>v2.1 · Vercel + MongoDB</p>
     </div>
   </aside>
 
@@ -284,6 +354,7 @@
       </button>
     </div>
 
+    <!-- Stats -->
     <div class="stats">
       <div class="stat-card blue">
         <div class="stat-label">Total de Notas</div>
@@ -300,13 +371,53 @@
         <div class="stat-value" id="stat-issued">—</div>
         <div class="stat-sub">concluídas</div>
       </div>
-      <div class="stat-card red">
-        <div class="stat-label">Valor Total</div>
-        <div class="stat-value" id="stat-amount" style="font-size:1.15rem">—</div>
-        <div class="stat-sub">em aberto</div>
+      <div class="stat-card purple">
+        <div class="stat-label">Recebido</div>
+        <div class="stat-value" id="stat-paid" style="font-size:1.05rem">—</div>
+        <div class="stat-sub">já pago</div>
       </div>
     </div>
 
+    <!-- Chart -->
+    <div class="chart-section">
+      <div class="chart-wrap">
+        <canvas id="financeChart"></canvas>
+      </div>
+      <div class="chart-legend">
+        <h3>Resumo Financeiro</h3>
+        <div class="legend-item">
+          <div class="legend-info">
+            <div class="legend-dot" style="background:#dc2626"></div>
+            <span class="legend-label">A Receber</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="legend-value" id="leg-receivable">—</span>
+            <span class="legend-pct" id="leg-receivable-pct">—%</span>
+          </div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-info">
+            <div class="legend-dot" style="background:#7c3aed"></div>
+            <span class="legend-label">Recebido</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="legend-value" id="leg-received">—</span>
+            <span class="legend-pct" id="leg-received-pct">—%</span>
+          </div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-info">
+            <div class="legend-dot" style="background:#2563eb"></div>
+            <span class="legend-label">Total Geral</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="legend-value" id="leg-total">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
     <div class="table-card">
       <div class="table-header">
         <h3>Notas Cadastradas</h3>
@@ -325,6 +436,7 @@
   </main>
 </div>
 
+<!-- Modal -->
 <div class="modal-backdrop" id="modal" onclick="closeModalOutside(event)">
   <div class="modal">
     <div class="modal-head">
@@ -368,12 +480,14 @@
   const API = '/api';
   let invoices = [];
   let editingId = null;
+  let chartInstance = null;
+  let openDropdownId = null;
 
-  // ── Date header ──────────────────────────────────
+  // Date header
   document.getElementById('topbar-date').textContent =
     new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
-  // ── CNPJ mask ────────────────────────────────────
+  // CNPJ mask
   document.getElementById('f-cnpj').addEventListener('input', function() {
     let v = this.value.replace(/\D/g, '').slice(0,14);
     if (v.length > 12) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/, '$1.$2.$3/$4-$5');
@@ -383,31 +497,99 @@
     this.value = v;
   });
 
-  // ── Load invoices ─────────────────────────────────
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.action-wrap')) closeAllDropdowns();
+  });
+
+  function closeAllDropdowns() {
+    document.querySelectorAll('.dropdown-menu.open').forEach(m => m.classList.remove('open'));
+    document.querySelectorAll('.btn-action.open').forEach(b => b.classList.remove('open'));
+    openDropdownId = null;
+  }
+
+  function toggleDropdown(id) {
+    const menu = document.getElementById('menu-' + id);
+    const btn  = document.getElementById('btn-' + id);
+    const isOpen = menu.classList.contains('open');
+    closeAllDropdowns();
+    if (!isOpen) {
+      menu.classList.add('open');
+      btn.classList.add('open');
+      openDropdownId = id;
+    }
+  }
+
+  // Load
   async function load() {
     try {
       const res = await fetch(`${API}/invoices`);
       invoices = await res.json();
       updateStats();
+      updateChart();
       renderTable();
     } catch(e) {
       showToast('Erro ao carregar notas.', 'error');
     }
   }
 
-  // ── Stats ─────────────────────────────────────────
+  // Stats
   function updateStats() {
-    const pending = invoices.filter(i => !i.issued);
-    const issued  = invoices.filter(i => i.issued);
-    const total   = pending.reduce((s, i) => s + i.amount, 0);
+    const pending    = invoices.filter(i => !i.issued);
+    const issued     = invoices.filter(i => i.issued);
+    const paid       = invoices.filter(i => i.paid);
+    const paidTotal  = paid.reduce((s, i) => s + i.amount, 0);
+
     document.getElementById('stat-total').textContent   = invoices.length;
     document.getElementById('stat-pending').textContent = pending.length;
     document.getElementById('stat-issued').textContent  = issued.length;
-    document.getElementById('stat-amount').textContent  =
-      total.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+    document.getElementById('stat-paid').textContent    =
+      paidTotal.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
   }
 
-  // ── Render table ──────────────────────────────────
+  // Chart
+  function updateChart() {
+    const paid       = invoices.filter(i => i.paid).reduce((s, i) => s + i.amount, 0);
+    const receivable = invoices.filter(i => !i.paid).reduce((s, i) => s + i.amount, 0);
+    const total      = paid + receivable;
+
+    const fmt = v => v.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+    const pct  = v => total > 0 ? Math.round((v / total) * 100) + '%' : '0%';
+
+    document.getElementById('leg-receivable').textContent     = fmt(receivable);
+    document.getElementById('leg-received').textContent       = fmt(paid);
+    document.getElementById('leg-total').textContent          = fmt(total);
+    document.getElementById('leg-receivable-pct').textContent = pct(receivable);
+    document.getElementById('leg-received-pct').textContent   = pct(paid);
+
+    const ctx = document.getElementById('financeChart').getContext('2d');
+    if (chartInstance) chartInstance.destroy();
+
+    const hasData = total > 0;
+    chartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['A Receber', 'Recebido'],
+        datasets: [{
+          data: hasData ? [receivable, paid] : [1, 0],
+          backgroundColor: hasData ? ['#dc2626', '#7c3aed'] : ['#e2e8f0', '#e2e8f0'],
+          borderWidth: 0,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        cutout: '72%',
+        plugins: { legend: { display: false }, tooltip: {
+          callbacks: {
+            label: ctx => ' ' + ctx.parsed.toLocaleString('pt-BR', { style:'currency', currency:'BRL' })
+          }
+        }},
+        animation: { animateRotate: true, duration: 500 }
+      }
+    });
+  }
+
+  // Render table
   function renderTable() {
     const q = document.getElementById('search').value.toLowerCase();
     const filtered = invoices.filter(i =>
@@ -420,7 +602,7 @@
       document.getElementById('table-wrap').innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">📭</div>
-          <p>${invoices.length ? 'Nenhuma nota encontrada para essa busca.' : 'Nenhuma nota cadastrada ainda. Clique em "Nova Nota Fiscal" para começar.'}</p>
+          <p>${invoices.length ? 'Nenhuma nota encontrada.' : 'Nenhuma nota cadastrada ainda. Clique em "Nova Nota Fiscal" para começar.'}</p>
         </div>`;
       return;
     }
@@ -429,12 +611,18 @@
       const created  = new Date(inv.createdAt).toLocaleDateString('pt-BR');
       const issuedAt = inv.issuedAt ? new Date(inv.issuedAt).toLocaleDateString('pt-BR') : '—';
       const amount   = Number(inv.amount).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
-      const badge    = inv.issued
+
+      const issuedBadge = inv.issued
         ? `<span class="badge issued">✔ Emitida</span>`
         : `<span class="badge pending">⏳ Pendente</span>`;
-      const toggleTitle = inv.issued ? 'Marcar como pendente' : 'Marcar como emitida';
-      const toggleIcon  = inv.issued ? '↩️' : '✅';
-      const toggleClass = inv.issued ? 'untoggle' : 'toggle';
+
+      const paidBadge = inv.paid
+        ? `<span class="badge paid">💰 Pago</span>`
+        : `<span class="badge unpaid">● A receber</span>`;
+
+      const issueLabel  = inv.issued ? 'Marcar como Pendente' : 'Marcar como Emitida';
+      const issueIcon   = inv.issued ? '↩' : '✔';
+      const issueClass  = inv.issued ? '' : 'success';
 
       return `<tr>
         <td class="company">
@@ -443,15 +631,42 @@
         </td>
         <td class="amount">${amount}</td>
         <td style="color:var(--muted);font-size:.82rem;">${inv.email}</td>
-        <td>${badge}</td>
+        <td>${issuedBadge}</td>
+        <td>${paidBadge}</td>
         <td style="color:var(--muted);font-size:.82rem;">${created}</td>
         <td style="color:var(--muted);font-size:.82rem;">${issuedAt}</td>
         <td>
-          <div class="actions">
-            <button class="btn-icon edit"   title="Editar"              onclick="openEdit('${inv._id}')">✏️</button>
-            <button class="btn-icon email"  title="Enviar lembrete"     onclick="sendEmail('${inv._id}', this)">📧</button>
-            <button class="btn-icon ${toggleClass}" title="${toggleTitle}" onclick="toggleIssued('${inv._id}', ${!inv.issued})">${toggleIcon}</button>
-            <button class="btn-icon del"    title="Excluir"             onclick="deleteInvoice('${inv._id}')">🗑️</button>
+          <div class="action-wrap">
+            <button class="btn-action" id="btn-${inv._id}" onclick="toggleDropdown('${inv._id}')">
+              Ações
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="dropdown-menu" id="menu-${inv._id}">
+              <button class="dropdown-item" onclick="sendEmail('${inv._id}'); closeAllDropdowns()">
+                <span class="dropdown-item-icon">✉</span> Enviar Lembrete
+              </button>
+              <button class="dropdown-item" onclick="openEdit('${inv._id}'); closeAllDropdowns()">
+                <span class="dropdown-item-icon">✏</span> Editar Nota
+              </button>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item ${issueClass}" onclick="toggleIssued('${inv._id}', ${!inv.issued}); closeAllDropdowns()">
+                <span class="dropdown-item-icon">${issueIcon}</span> ${issueLabel}
+              </button>
+              ${!inv.paid
+                ? `<button class="dropdown-item purple" onclick="markPaid('${inv._id}', true); closeAllDropdowns()">
+                    <span class="dropdown-item-icon">💰</span> Marcar como Pago
+                   </button>`
+                : `<button class="dropdown-item" onclick="markPaid('${inv._id}', false); closeAllDropdowns()">
+                    <span class="dropdown-item-icon">↩</span> Desmarcar Pagamento
+                   </button>`
+              }
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item danger" onclick="deleteInvoice('${inv._id}'); closeAllDropdowns()">
+                <span class="dropdown-item-icon">🗑</span> Excluir Nota
+              </button>
+            </div>
           </div>
         </td>
       </tr>`;
@@ -464,7 +679,8 @@
             <th>Empresa</th>
             <th>Valor</th>
             <th>E-mail</th>
-            <th>Status</th>
+            <th>Emissão</th>
+            <th>Pagamento</th>
             <th>Cadastrada em</th>
             <th>Emitida em</th>
             <th>Ações</th>
@@ -474,7 +690,7 @@
       </table>`;
   }
 
-  // ── Modal ─────────────────────────────────────────
+  // Modal
   function openModal() {
     editingId = null;
     document.getElementById('modal-title').textContent = 'Nova Nota Fiscal';
@@ -501,15 +717,10 @@
     document.getElementById('f-company').focus();
   }
 
-  function closeModal() {
-    document.getElementById('modal').classList.remove('open');
-  }
+  function closeModal() { document.getElementById('modal').classList.remove('open'); }
+  function closeModalOutside(e) { if (e.target === document.getElementById('modal')) closeModal(); }
 
-  function closeModalOutside(e) {
-    if (e.target === document.getElementById('modal')) closeModal();
-  }
-
-  // ── Save (create or update) ───────────────────────
+  // Save
   async function saveInvoice() {
     const company = document.getElementById('f-company').value.trim();
     const amount  = parseFloat(document.getElementById('f-amount').value);
@@ -518,10 +729,8 @@
       showToast('Preencha empresa, valor e e-mail.', 'error'); return;
     }
     const body = {
-      company,
+      company, amount, email,
       cnpj:  document.getElementById('f-cnpj').value.trim(),
-      amount,
-      email,
       notes: document.getElementById('f-notes').value.trim()
     };
 
@@ -552,7 +761,7 @@
     }
   }
 
-  // ── Toggle issued ─────────────────────────────────
+  // Toggle issued
   async function toggleIssued(id, issued) {
     try {
       const res = await fetch(`${API}/invoice?id=${id}`, {
@@ -567,10 +776,26 @@
     }
   }
 
-  // ── Send email ────────────────────────────────────
-  async function sendEmail(id, btn) {
-    btn.textContent = '';
-    btn.disabled = true;
+  // Mark paid
+  async function markPaid(id, paid) {
+    try {
+      const body = { paid };
+      if (paid) body.paidAt = new Date();
+      else body.paidAt = null;
+      const res = await fetch(`${API}/invoice?id=${id}`, {
+        method: 'PATCH', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error();
+      await load();
+      showToast(paid ? '💰 Nota marcada como paga!' : 'Pagamento desmarcado.', 'success');
+    } catch(e) {
+      showToast('Erro ao atualizar pagamento.', 'error');
+    }
+  }
+
+  // Send email
+  async function sendEmail(id) {
     try {
       const res = await fetch(`${API}/send-email`, {
         method: 'POST', headers: {'Content-Type':'application/json'},
@@ -580,13 +805,10 @@
       showToast('Lembrete enviado com sucesso!', 'success');
     } catch(e) {
       showToast('Erro ao enviar e-mail.', 'error');
-    } finally {
-      btn.textContent = '🗓️';
-      btn.disabled = false;
     }
   }
 
-  // ── Delete ────────────────────────────────────────
+  // Delete
   async function deleteInvoice(id) {
     if (!confirm('Excluir esta nota fiscal permanentemente?')) return;
     try {
@@ -598,7 +820,7 @@
     }
   }
 
-  // ── Toast ─────────────────────────────────────────
+  // Toast
   let toastTimer;
   function showToast(msg, type='') {
     const t = document.getElementById('toast');
@@ -608,13 +830,11 @@
     toastTimer = setTimeout(() => { t.className = ''; }, 3000);
   }
 
-  // ── Keyboard shortcuts ────────────────────────────
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Escape') { closeModal(); closeAllDropdowns(); }
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openModal(); }
   });
 
-  // ── Init ──────────────────────────────────────────
   load();
 </script>
 </body>
