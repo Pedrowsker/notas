@@ -29,8 +29,14 @@
       --radius:  12px;
       --shadow:  0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
     }
-    html { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--navy); }
-    body { min-height: 100vh; }
+    
+    html, body { 
+      font-family: 'Inter', sans-serif; 
+      background: var(--bg); 
+      color: var(--navy); 
+      min-height: 100vh; 
+      overflow-x: hidden; /* Previne a tela de ser arrastada para os lados */
+    }
 
     /* ── Mobile Header (Oculto no PC) ────────────── */
     .mobile-header {
@@ -262,7 +268,7 @@
         font-size: 20px; cursor: pointer;
       }
 
-      .main { margin-left: 0; padding: 80px 16px 16px 16px; } /* Espaço para o header fixo */
+      .main { margin-left: 0; padding: 80px 16px 16px 16px; width: 100%; box-sizing: border-box; } 
       
       /* Topbar */
       .topbar { flex-direction: column; align-items: stretch; gap: 16px; margin-bottom: 24px; }
@@ -275,12 +281,21 @@
       .stat-value { font-size: 1.3rem; }
       #stat-amount { font-size: 1rem !important; }
 
-      /* Tabela e Busca */
+      /* Tabela e Busca - Focada em não gerar scroll horizontal */
       .table-header { flex-direction: column; align-items: stretch; gap: 12px; padding: 16px; }
       .search-wrap, .search-wrap input { width: 100%; }
       
-      #table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      table { min-width: 750px; } 
+      /* Oculta colunas menos urgentes no celular para encaixar na tela perfeitamente */
+      thead th:nth-child(3), tbody td:nth-child(3), /* E-mail */
+      thead th:nth-child(5), tbody td:nth-child(5), /* Cadastrada em */
+      thead th:nth-child(6), tbody td:nth-child(6) { /* Emitida em */
+        display: none; 
+      }
+      
+      table { width: 100%; }
+      thead th, tbody td { padding: 12px 6px; font-size: 0.8rem; }
+      .actions { flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+      td.amount { font-size: 0.8rem; }
 
       /* Modal */
       .modal { padding: 24px 20px; width: calc(100% - 32px); margin: 16px auto; }
@@ -437,10 +452,8 @@
     openModal();       // Abre o modal padrão
   }
 
-  // Intercepta cliques nos links para fechar o menu no celular
   function showSection(section) {
     toggleMenu(false);
-    // Funcionalidade original mantida caso queira expandir
   }
 
   // ── Date header ──────────────────────────────────
@@ -575,7 +588,6 @@
     document.getElementById('f-company').focus();
   }
 
-  // Garante que fechar o modal remove a trava se necessário
   function closeModal() {
     document.getElementById('modal').classList.remove('open');
   }
