@@ -29,35 +29,8 @@
       --radius:  12px;
       --shadow:  0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
     }
-    
-    html, body { 
-      font-family: 'Inter', sans-serif; 
-      background: var(--bg); 
-      color: var(--navy); 
-      min-height: 100vh; 
-      overflow-x: hidden; /* Previne a tela de ser arrastada para os lados */
-    }
-
-    /* ── Mobile Header (Oculto no PC) ────────────── */
-    .mobile-header {
-      display: none;
-      background: var(--navy);
-      color: #fff;
-      padding: 16px;
-      align-items: center;
-      justify-content: space-between;
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 150;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-    .mobile-brand { display: flex; align-items: center; gap: 10px; }
-    .mobile-brand .logo-icon { font-size: 20px; }
-    .mobile-brand h1 { font-size: 1rem; font-weight: 700; }
-    .btn-menu {
-      background: none; border: none; color: #fff;
-      font-size: 24px; cursor: pointer; display: flex; align-items: center;
-    }
+    html { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--navy); }
+    body { min-height: 100vh; }
 
     /* ── Sidebar ──────────────────────────────────── */
     .layout { display: flex; min-height: 100vh; }
@@ -68,7 +41,6 @@
       padding: 28px 0;
       position: fixed; top: 0; left: 0; bottom: 0;
       z-index: 100;
-      transition: transform 0.3s ease;
     }
     .sidebar-brand {
       padding: 0 24px 28px;
@@ -95,9 +67,6 @@
     .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
     .sidebar-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,.08); }
     .sidebar-footer p { color: #475569; font-size: .72rem; }
-
-    /* Botão de fechar menu no mobile (oculto no PC) */
-    .sidebar-close { display: none; }
 
     /* ── Main content ─────────────────────────────── */
     .main { margin-left: 240px; flex: 1; padding: 32px 36px; max-width: 1100px; }
@@ -248,27 +217,8 @@
     
     /* Configurações específicas para Celulares */
     @media (max-width: 640px) {
-      .mobile-header { display: flex; }
-      
-      /* Sidebar vira um menu deslizante (Gaveta) */
-      .sidebar { 
-        transform: translateX(-100%); 
-        width: 260px; 
-        box-shadow: 4px 0 24px rgba(0,0,0,0.3);
-        z-index: 250;
-      }
-      .sidebar.menu-open { transform: translateX(0); }
-      
-      /* Botão para fechar a sidebar no mobile */
-      .sidebar-close {
-        display: block;
-        position: absolute;
-        top: 16px; right: 16px;
-        background: none; border: none; color: #94a3b8;
-        font-size: 20px; cursor: pointer;
-      }
-
-      .main { margin-left: 0; padding: 80px 16px 16px 16px; width: 100%; box-sizing: border-box; } 
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 16px; }
       
       /* Topbar */
       .topbar { flex-direction: column; align-items: stretch; gap: 16px; margin-bottom: 24px; }
@@ -279,27 +229,19 @@
       .stats { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
       .stat-card { padding: 16px; }
       .stat-value { font-size: 1.3rem; }
-      #stat-amount { font-size: 1rem !important; }
+      #stat-amount { font-size: 1rem !important; } /* Previne que valores longos quebrem o card */
 
-      /* Tabela e Busca - Focada em não gerar scroll horizontal */
+      /* Tabela e Busca */
       .table-header { flex-direction: column; align-items: stretch; gap: 12px; padding: 16px; }
       .search-wrap, .search-wrap input { width: 100%; }
       
-      /* Oculta colunas menos urgentes no celular para encaixar na tela perfeitamente */
-      thead th:nth-child(3), tbody td:nth-child(3), /* E-mail */
-      thead th:nth-child(5), tbody td:nth-child(5), /* Cadastrada em */
-      thead th:nth-child(6), tbody td:nth-child(6) { /* Emitida em */
-        display: none; 
-      }
-      
-      table { width: 100%; }
-      thead th, tbody td { padding: 12px 6px; font-size: 0.8rem; }
-      .actions { flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
-      td.amount { font-size: 0.8rem; }
+      /* Scroll horizontal para a tabela (não perde os dados ao invés de display:none) */
+      #table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      table { min-width: 750px; } 
 
       /* Modal */
       .modal { padding: 24px 20px; width: calc(100% - 32px); margin: 16px auto; }
-      .field-row { grid-template-columns: 1fr; gap: 0; }
+      .field-row { grid-template-columns: 1fr; gap: 0; } /* Empilha CNPJ e Valor */
       .modal-footer { flex-direction: column-reverse; gap: 8px; margin-top: 16px; }
       .modal-footer button, .modal-footer .btn-ghost { width: 100%; justify-content: center; padding: 12px; }
 
@@ -310,18 +252,8 @@
 </head>
 <body>
 
-<header class="mobile-header">
-  <div class="mobile-brand">
-    <span class="logo-icon">📄</span>
-    <h1>Notas Fiscais</h1>
-  </div>
-  <button class="btn-menu" onclick="toggleMenu(true)">☰</button>
-</header>
-
 <div class="layout">
-  <aside class="sidebar" id="app-sidebar">
-    <button class="sidebar-close" onclick="toggleMenu(false)">✕</button>
-    
+  <aside class="sidebar">
     <div class="sidebar-brand">
       <div class="logo-icon">📄</div>
       <h1>Notas Fiscais</h1>
@@ -332,7 +264,7 @@
       <button class="nav-item active" onclick="showSection('dashboard')">
         <span class="icon">📊</span> Dashboard
       </button>
-      <button class="nav-item" onclick="openModalMobile()">
+      <button class="nav-item" onclick="openModal()">
         <span class="icon">➕</span> Nova Nota
       </button>
     </nav>
@@ -436,25 +368,6 @@
   const API = '/api';
   let invoices = [];
   let editingId = null;
-
-  // ── Funções de controle do Menu Mobile ───────────
-  function toggleMenu(open) {
-    const sidebar = document.getElementById('app-sidebar');
-    if (open) {
-      sidebar.classList.add('menu-open');
-    } else {
-      sidebar.classList.remove('menu-open');
-    }
-  }
-
-  function openModalMobile() {
-    toggleMenu(false); // Fecha o menu lateral
-    openModal();       // Abre o modal padrão
-  }
-
-  function showSection(section) {
-    toggleMenu(false);
-  }
 
   // ── Date header ──────────────────────────────────
   document.getElementById('topbar-date').textContent =
@@ -656,7 +569,7 @@
 
   // ── Send email ────────────────────────────────────
   async function sendEmail(id, btn) {
-    btn.textContent = '⏳';
+    btn.textContent = '';
     btn.disabled = true;
     try {
       const res = await fetch(`${API}/send-email`, {
@@ -668,7 +581,7 @@
     } catch(e) {
       showToast('Erro ao enviar e-mail.', 'error');
     } finally {
-      btn.textContent = '📧';
+      btn.textContent = '🗓️';
       btn.disabled = false;
     }
   }
@@ -697,7 +610,7 @@
 
   // ── Keyboard shortcuts ────────────────────────────
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeModal(); toggleMenu(false); }
+    if (e.key === 'Escape') closeModal();
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openModal(); }
   });
 
